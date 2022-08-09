@@ -6,6 +6,7 @@ from ase.io import lammpsdata
 from ase.lattice.cubic import BodyCenteredCubic
 import numpy as np
 import ase
+import matplotlib as plt
 from ase.build import attach
 import math
 from ase import neighborlist
@@ -28,7 +29,7 @@ atoms = BodyCenteredCubic(directions=[[a,0,0], [0,a,0], [0,0,a]],
 # print(atoms.positions)
 # view(atoms)
 
-# удаления атома на диагонале
+# удаления атома на диагонали
 del atoms[[atom.index for atom in atoms if atom.index == 173]]
 
 # print(pos[173], '\n')
@@ -55,7 +56,7 @@ atoms.positions[-1] = absol2
 # atoms.append('Li')
 # atoms.positions[-1] = absol3
 
-# вычисление диагонали
+# вычисление диагонали  --- с точностью эпсилон
 pos = atoms.positions
 m = []
 for i in range(len(pos)):
@@ -76,18 +77,19 @@ for i in range(len(m)):
 # print(n_arr)
 
 
+
 #   оптимизация
 # atoms.calc = lammps
 # FIRE(atoms)
 
-
+print(atoms.cell)
 # расстояние между атомами
 
-print(len(n_arr))
+# print(len(n_arr))
 def distance(x0, x1, dimensions):
     delta = np.abs(x0 - x1)
     delta = np.where(delta > 0.5 * dimensions, delta - dimensions, delta)
-    return np.sqrt((delta ** 2).sum(axis=-1))
+    return np.array(np.sqrt((delta ** 2).sum(axis=1)))
 
 # print(distance(n_arr[11], n_arr[1], dist))
 
@@ -96,6 +98,7 @@ def distance(x0, x1, dimensions):
 lammpsdata.write_lammps_data('bulk.lammps-data', atoms)
 
 #xyz.read_xyz('E_int_1_diag2.xyz', index=None)
+
 
 
 path = "coords_int_diag2.txt"
@@ -107,7 +110,35 @@ arr = np.delete(arr, 0, axis=1)
 arr = arr.tolist()
 arr_mod = np.array(list(np.float_(arr)))
 
+# оптимизированный кристалл
 a1 = Atoms('Li433', positions=arr_mod)
 dist = a1.cell
+# view(a1)
 
-# print(distance(arr_mod[1], arr_mod[2], dist))
+#    диагональ после оптимизации \ расстояние между атомами на диагонале
+pos_optimized = a1.positions
+dim = dist
+
+
+print(m)
+for i in range(1, len(m)):
+    d = distance(pos_optimized[m[i]], pos_optimized[m[i - 1]], dim)
+    #print(distance(pos_optimized[m[i]], pos_optimized[m[i - 1]], dim), m[i], '--', m[i-1], '\n')
+    print(d[0])
+
+print(distance(pos_optimized[m[12]], pos_optimized[m[0]], dim))
+
+# запись координат диагонали после оптимизации в новый массив
+# n_arr2 = []
+# for i in range(len(m)):
+#     n_arr2.append(pos_optimized[m[i]])
+#
+#
+# a_diag = Atoms('Li', positions=n_arr2)
+#
+# view(a_diag)
+
+
+
+
+### есть ли id атомов в асе
