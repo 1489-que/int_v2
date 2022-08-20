@@ -17,9 +17,13 @@ from ase.calculators.lammpsrun import LAMMPS
 
 
 def distance(x0, x1, dimensions):
-    delta = np.abs(x0 - x1)
-    delta = np.where(delta[0] > 0.5 * dimensions, delta[0] - dimensions, delta[0])
-    return np.array(np.sqrt((delta ** 2).sum(axis=1)))
+    delta = np.abs(x1 - x0)
+    # delta = np.where(delta[0] > 0.5 * dimensions[0], delta[0] - dimensions[0], delta[0])
+    if delta[0] > ( 0.5 * dimensions ):
+        delta = delta[0] - dimensions
+    else:
+        delta = delta[0]
+    return np.sqrt((delta ** 2).sum())
 
 
 # сам кристалл
@@ -29,7 +33,7 @@ atoms = BodyCenteredCubic(directions=[[a,0,0], [0,a,0], [0,0,a]],
                           latticeconstant=3.52)
 # print(atoms.positions)
 # view(atoms)
-dist = atoms.cell
+dist = 21.12
 # удаления атома на диагонали
 del atoms[[atom.index for atom in atoms if atom.index == 173]]
 
@@ -79,15 +83,8 @@ arr = arr.tolist()
 arr_mod = np.array(list(np.float_(arr)))
 
 # оптимизированный кристалл
-a1 = Atoms('Li433', positions=arr_mod, pbc=True)
-# view(a1)
-pos_optimized = a1.positions
-#    диагональ после оптимизации \ расстояние между атомами на диагонале
-# pos_optimized = a1.positions
+pos_optimized = arr_mod
 dim = dist
-
-
-diag_d = []
 
 p1 = distance(pos_optimized[m[1]], pos_optimized[m[0]], dim)
 p2 = distance(pos_optimized[m[2]], pos_optimized[m[1]], dim)
@@ -103,17 +100,18 @@ p11 = distance(pos_optimized[m[9]], pos_optimized[m[8]], dim)
 p12 = distance(pos_optimized[m[10]], pos_optimized[m[9]], dim)
 p13 = distance(pos_optimized[m[10]], pos_optimized[m[0]], dim)
 
-# print(p[0])
-diag_d.extend([p1[0], p2[0], p3[0], p4[0], p5[0], p6[0], p7[0], p8[0], p9[0], p10[0], p11[0], p12[0], p13[0]])
+diag_d = []
+# diag_d.extend([p1[0], p2[0], p3[0], p4[0], p5[0], p6[0], p7[0], p8[0], p9[0], p10[0], p11[0], p12[0], p13[0]])
+diag_d.extend([p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12])
 print(diag_d)
 
 #   ГРАФИК
 
 print(len(diag_d))
-x = np.arange(0, 13)
+x = np.arange(0, 12)
 print(x)
 plt.plot(x, diag_d)
 plt.show()
 
 
-### есть ли id атомов в асе
+# есть ли id атомов в асе
