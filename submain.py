@@ -4,8 +4,9 @@ from ase.lattice.cubic import BodyCenteredCubic
 import numpy as np
 from matplotlib import pyplot as plt
 from ase import io
-import shutil
+from matplotlib.backends.backend_pdf import PdfPages
 from ase.build.tools import sort
+
 
 def distance(x0, x1, dimensions):
     delta = np.abs(x1 - x0)
@@ -23,17 +24,16 @@ def distance(x0, x1, dimensions):
         delta[2] = delta[2]
     return np.sqrt((delta ** 2).sum())
 
+
 # сам кристалл
 a = 1
-nsize = 21
+nsize = 41
 lattice_const = 3.52
 atoms = BodyCenteredCubic(directions=[[a, 0, 0], [0, a, 0], [0, 0, a]],
                           size=(nsize, nsize, nsize), symbol='Li',
                           latticeconstant=lattice_const)
 
-print(atoms.cell)
 c = atoms.cell[0][0]
-print(c)
 
 ########################
 
@@ -42,13 +42,24 @@ atoms.append('Li')
 
 del_index = nsize
 
+temp = lattice_const / 6
+
 # диагональ
 d = []
+m = []
 for atm in atoms:
     if np.std(atm.position) <= lattice_const / 100:
         d.append(atm)
-pos_int = d[del_index].position / 3 + d[del_index].position
+        m.append(atm.index)
+
+# print(len(m))
+pos_int = temp + d[del_index].position
+pos_b_int = d[del_index].position - temp
+# print(pos_b_int, ' ', pos_int, ' ', d[del_index - 1], d[del_index + 1])
+del (d[del_index])
 atoms.positions[-1] = pos_int
+atoms.positions[-1] = pos_b_int
+
 d = []
 m = []
 for atm in reversed(atoms):
@@ -56,15 +67,9 @@ for atm in reversed(atoms):
         d.append(atm)
         m.append(atm.index)
 
-
 ########################
 
-from sys import argv
-print(str(argv))
-
-########################
-
-DESTPATH = r"C:\Users\default.DESKTOP-J9F7KTV\OneDrive\PROJ\CODE"
+DESTPATH = r"C:\Users\default.DESKTOP-J9F7KTV\OneDrive\PROJ\CODE\\"
 lammpsdata.write_lammps_data(DESTPATH + "\\bulk.lammps-data", atoms)
 os.chdir(DESTPATH)
 os.system("run.bat")
@@ -86,5 +91,14 @@ print(p)
 
 # plot
 x = np.arange(0, len(m))
+fig, ax = plt.subplots(figsize=(8, 6))
+fig.subplots_adjust(bottom=0.15, left=0.2)
+pdf = PdfPages('bulks' + str(nsize) + '.pdf')
 plt.plot(x, p, 'o-')
-plt.show()
+
+ax.set_xlabel('Atom id')
+ax.set_ylabel('Distance between atoms [Å]')
+pdf.savefig()
+pdf.close()
+
+# plt.show()
