@@ -7,7 +7,6 @@ from ase import io
 import shutil
 from ase.build.tools import sort
 
-
 def distance(x0, x1, dimensions):
     delta = np.abs(x1 - x0)
     if delta[0] > (0.5 * dimensions):
@@ -24,26 +23,31 @@ def distance(x0, x1, dimensions):
         delta[2] = delta[2]
     return np.sqrt((delta ** 2).sum())
 
-
 # сам кристалл
 a = 1
-nsize = 6
+nsize = 21
 lattice_const = 3.52
 atoms = BodyCenteredCubic(directions=[[a, 0, 0], [0, a, 0], [0, 0, a]],
                           size=(nsize, nsize, nsize), symbol='Li',
                           latticeconstant=lattice_const)
-c = 21.12
+
+print(atoms.cell)
+c = atoms.cell[0][0]
+print(c)
+
 ########################
 
 pos = atoms.positions
 atoms.append('Li')
+
+del_index = nsize
 
 # диагональ
 d = []
 for atm in atoms:
     if np.std(atm.position) <= lattice_const / 100:
         d.append(atm)
-pos_int = d[6].position / 10 + d[6].position
+pos_int = d[del_index].position / 3 + d[del_index].position
 atoms.positions[-1] = pos_int
 d = []
 m = []
@@ -52,14 +56,18 @@ for atm in reversed(atoms):
         d.append(atm)
         m.append(atm.index)
 
+
 ########################
 
-DESTPATH = r"C:\Users\default.DESKTOP-J9F7KTV\OneDrive\Рабочий стол\GB_structures\CODE"
+from sys import argv
+print(str(argv))
 
-lammpsdata.write_lammps_data('bulk.lammps-data', atoms)
-shutil.copy2(r"bulk.lammps-data", DESTPATH)
-os.system(DESTPATH + "\run.bat")
-# os.system("pause")
+########################
+
+DESTPATH = r"C:\Users\default.DESKTOP-J9F7KTV\OneDrive\PROJ\CODE"
+lammpsdata.write_lammps_data(DESTPATH + "\\bulk.lammps-data", atoms)
+os.chdir(DESTPATH)
+os.system("run.bat")
 atoms_read = io.read(DESTPATH + "\E_int_1_diag2.lammps-dump-text")
 pos_a_read = atoms_read.positions
 
