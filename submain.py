@@ -27,7 +27,7 @@ def distance(x0, x1, dimensions):
 
 # сам кристалл
 a = 1
-nsize = 6
+nsize = 21
 lattice_const = 3.52
 atoms = BodyCenteredCubic(directions=[[a, 0, 0], [0, a, 0], [0, 0, a]],
                           size=(nsize, nsize, nsize), symbol='Li',
