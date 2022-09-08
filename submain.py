@@ -27,7 +27,7 @@ def distance(x0, x1, dimensions):
 
 # сам кристалл
 a = 1
-nsize = 41
+nsize = 6
 lattice_const = 3.52
 atoms = BodyCenteredCubic(directions=[[a, 0, 0], [0, a, 0], [0, 0, a]],
                           size=(nsize, nsize, nsize), symbol='Li',
@@ -89,16 +89,23 @@ for i in range(1, len(m)):
 p.append(distance(pos_sort[len(m) - 1], pos_sort[0], c))
 print(p)
 
+# отклонение от идеального значения
+
+dev_p = np.array(p) - lattice_const / 2 * 3**0.5
+print(dev_p)
+
 # plot
 x = np.arange(0, len(m))
 fig, ax = plt.subplots(figsize=(8, 6))
 fig.subplots_adjust(bottom=0.15, left=0.2)
 pdf = PdfPages('bulks' + str(nsize) + '.pdf')
-plt.plot(x, p, 'o-')
+plt.plot(x, dev_p, 'o-')
 
 ax.set_xlabel('Atom id')
-ax.set_ylabel('Distance between atoms [Å]')
+ax.set_ylabel('MD [Å]')
 pdf.savefig()
 pdf.close()
 
-# plt.show()
+plt.title(str(nsize) + '×' + str(nsize) + '×' + str(nsize))
+
+plt.show()
